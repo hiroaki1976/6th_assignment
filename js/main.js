@@ -1,13 +1,10 @@
-const btn = document.getElementById("search");
-
-btn.addEventListener('click', async() => {
+$("#search").on('click', async() => {
     // フォームに入力されたテキストの取得
-    const textValue = document.getElementById("formText").value;
+    const textValue = $("#formText")[0].value;
     // 書籍検索ができるGoogle Books APIのエンドポイントにフォームから取得したテキストを埋め込む
     const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${textValue}`);
     const data = await res.json();
-    console.log(data);
-    const bookItem = document.getElementById("bookItem");
+    const bookItem = $("#bookItem")[0];
     for(let i = 0; i < data.items.length; i++){
         // 例外が起きなければtryブロック内のコードが実行される
         try{
