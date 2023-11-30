@@ -9,14 +9,17 @@
 </head>
 <body>
     <h1>読書記録アプリ</h1>
+    <h2>登録された書籍</h2>
     <div class="outputarea" id="output">
         <!-- ここに登録したものが表示される -->
     </div>
-    <input type="text" id="formText" placeholder="本のタイトルやキーワードを入力して下さい">
-    <button id="search">検索する</button>
-    <div id="bookItem">
-        
-
+    <h2>書籍検索</h2>
+    <div class="inputarea">
+        <input type="text" id="formText" placeholder="本のタイトルやキーワードを入力して下さい">
+        <button id="search">検索する</button>
+        <div id="bookItem">
+            <!-- ここに検索したものが表示される -->
+        </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script type="module" src="js/main.js"></script>

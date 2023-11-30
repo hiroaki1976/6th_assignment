@@ -1,119 +1,122 @@
-  // Import the functions you need from the SDKs you need
+//
+// Firebase設定
+//
+
+// Import the functions you need from the SDKs you need
     import { initializeApp } 
         from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
     import { getDatabase, ref, push, set, onChildAdded, remove, onChildRemoved, update, onChildChanged }
         from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
 
-  // Your web app's Firebase configuration
-  import {firebaseConfig} from "../setting/firebase_api.js"
+// Your web app's Firebase configuration
+    import {firebaseConfig} from "../setting/firebase_api.js" // APIを外部からimportする
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app); //RealtimeDBに接続
-  const dbRef = ref(db, 'book/');
+// Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app); // RealtimeDBに接続
+    const dbRef = ref(db, 'book/');// RealtimeDB内の"book"を使う
 
-
-let bookImg;
-let bookTitle;
-let bookLink;
+//
+// dataだけグローバル変数にする（複数の関数で使用するため）
+//
 let data;
 
+//
+// Google books APIでデータを取得する関数
+//
 $("#search").on('click', async() => {
-    // フォームに入力されたテキストの取得
-    const textValue = $("#formText")[0].value;
-    // 書籍検索ができるGoogle Books APIのエンドポイントにフォームから取得したテキストを埋め込む
-    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${textValue}`);
-    data = await res.json();
-    const bookItem = $("#bookItem")[0];
+    const textValue = $("#formText")[0].value;// フォームに入力されたテキストの取得
+    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${textValue}`);// Google Books APIのエンドポイントにフォームから取得したテキストを埋め込む
+    data = await res.json();// 取得したjsonを配列データに変換する
+    const bookItem = $("#bookItem")[0];// Id"bookItem"を取得し、定数bookItemへ代入する
     for(let i = 0; i < data.items.length; i++){
-        // 例外が起きなければtryブロック内のコードが実行される
-        try{
-            // JSONデータの取得
-            // 画像を表示するリンク
-            bookImg = data.items[i].volumeInfo.imageLinks.smallThumbnail;
-            // 本のタイトル
-            bookTitle = data.items[i].volumeInfo.title;
-            // 本の説明文
-            const bookContent = data.items[i].volumeInfo.description;
-            // 各書籍のGoogle Booksへのリンク
-            bookLink = data.items[i].volumeInfo.infoLink;
-            // 取得したデータを入れるための要素を作成
-            const makeElement = document.createElement("div");
-            // 要素別に識別できるようにidに数字を埋め込む
-            makeElement.setAttribute("id", `bookItem${i}`);
-            // 取得した要素に作成した要素を挿入
-            bookItem.appendChild(makeElement);
-            // 作成した要素を習得
-            const getBookItem = $(`#bookItem${i}`)[0];
-            // APIで取得したデータの分だけHTML要素を作成し、取得した要素にを埋め込む
+        try{// 例外が起きなければtryブロック内のコードが実行される
+            const bookImg = data.items[i].volumeInfo.imageLinks.smallThumbnail;// 画像を表示するリンク
+            const bookTitle = data.items[i].volumeInfo.title;// 本のタイトル
+            const bookAuthors = data.items[i].volumeInfo.authors[0];// 本の著者
+            const bookContent = data.items[i].volumeInfo.description;// 本の説明文
+            const bookLink = data.items[i].volumeInfo.infoLink;// 各書籍のGoogle Booksへのリンク
+            const makeElement = document.createElement("div");// 取得したデータを入れるための要素を作成
+            makeElement.setAttribute("id", `bookItem${i}`);// 要素別に識別できるようにidに数字を埋め込む
+            bookItem.appendChild(makeElement);// 取得した要素に作成した要素を挿入
+            const getBookItem = $(`#bookItem${i}`)[0];// 作成した要素を定数getBookItemへ代入する
+            // APIで取得したデータの分だけHTML要素を作成し、取得した要素を埋め込む
             const setBookElement = `
                 <div class="container">
-                    <div>
-                        <div>
-                            <div>
+                    <div class="conOuter">
+                        <div class="con-inner">
+                            <div class="book-img">
                                 <img src="${bookImg}"><br>
                                 <a id="link${i}" target="_blank">${bookTitle}</a>
-                                <div>
-                                    <p>${bookContent}</p>
-                                </div>
+                                <p>${bookAuthors}</p>
                             </div>
-                            <button class="registration">登録する</button>
+                            <div class="book-content">
+                                <p>${bookContent}</p>
+                            </div>
                         </div>
+                        <button class="registration">登録する</button>
                     </div>
                 </div>
             `;
-            // APIから取得した、実際のGoogle Booksのサイトに飛ばすためのリンクを埋め込む
-            getBookItem.innerHTML = setBookElement;
-            const link = $(`#link${i}`)[0];
-            link.href = bookLink;
-            // 途中で例外が発生した場合はcatchブロック内のコードが実行される
-        }catch(e){
+            getBookItem.innerHTML = setBookElement;// getBookItemの内容をsetBookElementへ書き換える
+            const link = $(`#link${i}`)[0];// id="link[*]"の内容を取得し、定数linkへ代入する
+            link.href = bookLink;// 定数bookLinkを定数linkのhrefへ代入する
+        }catch(e){// 途中で例外が発生した場合はcatchブロック内のコードが実行される
             continue;
         };
     };
 });
 
+//
 // 検索されたデータを登録する
+//
 $('#bookItem').on('click', '.registration', function () {
-    // クリックされたボタンに対応する書籍情報を取得
-    const index = $(this).closest('.container').parent().index();
-    console.log(index);
-    const selectedBook = data.items[index];
-    console.log(selectedBook);
+    const container = $(this).closest('.container');// .containerの中のクリックされた登録ボタンの所の要素を定数containerへ代入する
+    const bookImg = container.find('img').attr('src');// 定数containerの中から書籍画像のリンクを取得し、定数bookImgへ代入する
+    const bookTitle = container.find('a').text();// 定数containerの中から書籍タイトルの文字列を取得し、定数bookTitleへ代入する
+    // const bookAuthors =container.find('p').text();// 定数containerの中から書籍著者の文字列を取得し、定数bookAuthorsへ代入する
+    const bookLink = container.find('a').attr('href');// 定数containerの中からGoogle Booksへのリンクを取得し、定数bookLinkへ代入する
 
-    // 書籍情報から必要なデータを取得
-    const bookImg = selectedBook.volumeInfo.imageLinks.smallThumbnail;
-    const bookTitle = selectedBook.volumeInfo.title;
-    const bookLink = selectedBook.volumeInfo.infoLink;
-
-    // 登録データを作成
-    const obj = {
+    const obj = {// 登録データを作成
         img: bookImg,
         title: bookTitle,
+        // authors: bookAuthors,
         link: bookLink
     };
 
-    // Firebaseにデータを登録
-    const newPostRef = push(dbRef);
-    set(newPostRef, obj);
+    const newPostRef = push(dbRef);// Firebaseにデータを登録
+    set(newPostRef, obj);// Firebaseにデータを登録
 });
 
-//最初にデータ取得＆onSnapshotでリアルタイムにデータを取得
+//
+// 最初にデータ取得＆リアルタイムにデータを取得
+//
 onChildAdded(dbRef, function (data) {
-    const obj = data.val();//オブジェクトデータを取得し、変数msgに代入
-    const key = data.key;//データのユニークキー（削除や更新に必須）
-    let html;
+    const obj = data.val();// オブジェクトデータを取得し、変数objに代入
+    const key = data.key;// データのユニークキー（削除や更新に必須）
 //表示用テキスト・HTMLを作成
-    html = `
+    let html = `
     <div class="${key}">
         <div class="container">
             <img src="${obj.img}"><br>
-            <a href="${obj.link}" target="_blank">${obj.title}</a>
+            <a href="${obj.link}" target="_blank">${obj.title}</a><br>
+            <!-- <p>${obj.authors}</p> -->
             <span class="remove" data-key="${key}">🗑</span>
         </div>
     </div>
     `;
 $("#output").prepend(html); //#outputの最後に追加
+});
+
+//
+// 個別の登録の削除
+// 
+$('#output').on('click', '.remove', function(){
+    const key = $(this).attr('data-key');
+    const removeItem = ref(db, 'book/'+'/'+key);
+    remove(removeItem);// Firebaseデータ削除関数
+});
+
+onChildRemoved(dbRef, function(data) {
+    $('.'+data.key).remove();// HTML上のデータを削除
 });
