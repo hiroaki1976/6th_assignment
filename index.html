@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="jp">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,10 +9,14 @@
 </head>
 <body>
     <h1>読書記録アプリ</h1>
+    <div class="outputarea" id="output">
+        <!-- ここに登録したものが表示される -->
+    </div>
     <input type="text" id="formText" placeholder="本のタイトルやキーワードを入力して下さい">
     <button id="search">検索する</button>
     <div id="bookItem">
+        
 
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="js/main.js"></script>
+    <script type="module" src="js/main.js"></script>
